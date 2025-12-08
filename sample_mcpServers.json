@@ -1,0 +1,96 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npx",
+      "args": ["-y", "obsidian-mcp-server"],
+      "transportType": "stdio",
+      "env": {
+        "OBSIDIAN_API_KEY": "your-api-key-here",
+        "OBSIDIAN_BASE_URL": "https://10.1.0.31:27124",
+        "OBSIDIAN_VERIFY_SSL": "false",
+        "OBSIDIAN_ENABLE_CACHE": "true",
+        "OBSIDIAN_VAULT_PATH": "/data/vimwiki/knowledgebase/"
+      },
+      "enabled": false
+    },
+    "crawl4ai": {
+      "command": "npx",
+      "args": ["-y", "mcp-crawl4ai-ts"],
+      "env": { 
+        "CRAWL4AI_BASE_URL": "http://10.1.0.75:11235" 
+      },
+      "enabled": false
+    },
+    "nyt": {
+      "command": "node",
+      "args": ["/data/mcp-proxy/servers/nyt/build/index.js"],
+      "env": { 
+        "NYTIMES_API_KEY": "your-nyt-api-key" 
+      },
+      "enabled": false
+    },
+    "semantic-obsidian": {
+      "command": "npx",
+      "args": ["-y", "semantic-obsidian-mcp"],
+      "env": {
+        "OBSIDIAN_VAULT_PATH": "/data/vimwiki/knowledgebase/"
+      },
+      "enabled": false
+    },
+    "stt": {
+      "command": "npx",
+      "args": ["-y", "speech-to-text-mcp"],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-key"
+      },
+      "enabled": false
+    },
+    "tts": {
+      "command": "npx",
+      "args": ["-y", "text-to-speech-mcp"],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-key"
+      },
+      "enabled": false
+    },
+    "flux1": {
+      "command": "npx",
+      "args": ["-y", "flux-mcp-server"],
+      "env": {
+        "REPLICATE_API_TOKEN": "your-replicate-token"
+      },
+      "enabled": false
+    },
+    "nano-banana": {
+      "command": "npx", 
+      "args": ["-y", "nano-banana-mcp"],
+      "enabled": false
+    },
+    "gemini": {
+      "command": "npx",
+      "args": ["-y", "gemini-mcp-server"],
+      "env": {
+        "GOOGLE_API_KEY": "your-gemini-api-key"
+      },
+      "enabled": false
+    },
+    "curl": {
+      "command": "npx",
+      "args": ["-y", "curl-mcp"],
+      "enabled": true
+    },
+    "current-time": {
+      "command": "npx",
+      "args": ["-y", "current-time-mcp"],
+      "enabled": true
+    },
+    "github-official": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "your-github-token"
+      },
+      "enabled": false
+    }
+  }
+}

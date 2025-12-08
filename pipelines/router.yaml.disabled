@@ -1,0 +1,19 @@
+components:
+  - name: router_agent
+    type: haystack.components.agents.Agent
+    init_parameters:
+      model: "ollama/glm-4.6:cloud"
+      system_prompt: |
+        You are a routing and execution assistant.
+        You receive a user request and a set of MCP tools.
+        Decide which MCP tool or tools are needed, call them,
+        then write a clear final answer for the user.
+
+pipelines:
+  - name: router
+    inputs: ["messages"]
+    outputs: ["replies"]
+    nodes:
+      - name: router_agent
+        inputs:
+          messages: "messages"

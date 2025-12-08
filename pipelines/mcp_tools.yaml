@@ -1,0 +1,17 @@
+components:
+  - name: tool_executor
+    type: haystack.components.generators.OllamaGenerator
+    init_parameters:
+      model: "llama3.2"
+      generation_kwargs:
+        temperature: 0.7
+
+pipelines:
+  - name: mcp_tools
+    type: yaml
+    inputs: ["messages"]
+    outputs: ["replies"]
+    nodes:
+      - name: tool_executor
+        inputs:
+          messages: "messages"
