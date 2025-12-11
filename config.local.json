@@ -1,0 +1,167 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "/run/current-system/sw/bin/npx",
+      "args": ["-y", "obsidian-mcp-server"],
+      "transportType": "stdio",
+      "env": {
+        "OBSIDIAN_API_KEY": "YOUR_OBSIDIAN_API_KEY",
+        "OBSIDIAN_BASE_URL": "https://10.1.0.31:27124",
+        "OBSIDIAN_VERIFY_SSL": "false",
+        "OBSIDIAN_ENABLE_CACHE": "true",
+        "OBSIDIAN_VAULT_PATH": "/data/vimwiki/knowledgebase/"
+      },
+      "enabled": false
+    },
+    "crawl4ai": {
+      "command": "npx",
+      "args": ["-y", "mcp-crawl4ai-ts"],
+      "env": { "CRAWL4AI_BASE_URL": "YOUR_CRAWL4AI_BASE_URL" },
+      "enabled": false
+    },
+    "nyt": {
+      "command": "node",
+      "args": ["/data/mcp-proxy/servers/nyt/build/index.js"],
+      "env": { "NYTIMES_API_KEY": "YOUR_NYT_API_KEY" },
+      "enabled": false
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": false
+    },
+    "semantic-obsidian": {
+      "command": "/run/current-system/sw/bin/npx",
+      "args": ["-y", "obsidian-semantic-mcp"],
+      "transportType": "stdio",
+      "env": {
+        "OBSIDIAN_API_KEY": "YOUR_OBSIDIAN_API_KEY",
+        "OBSIDIAN_API_URL": "https://10.1.0.31:27124",
+        "OBSIDIAN_VERIFY_SSL": "false",
+        "OBSIDIAN_ENABLE_CACHE": "true",
+        "OBSIDIAN_VAULT_NAME": "knowledgebase"
+      },
+      "enabled": false
+    },
+    "stt": {
+      "command": "node",
+      "args": ["/data/mcp-proxy/servers/local-stt-mcp/mcp-server/dist/index.js"],
+      "cwd": "/data/mcp-proxy/servers/local-stt-mcp/",
+      "env": {
+        "HF_TOKEN": "YOUR_HF_TOKEN"
+      },
+      "description": "Speech to text and diarization",
+      "enabled": false
+    },
+    "tts": {
+      "command": "/run/current-system/sw/bin/node",
+      "args": ["/data/mcp-proxy/servers/advanced-tts-mcp/dist/index.js"],
+      "cwd": "/data/mcp-proxy/servers/advanced-tts-mcp/",
+      "env": {
+        "KOKORO_MODEL_PATH": "/data/servers/kokoro-v1.0.onnx",
+        "KOKORO_VOICES_PATH": "/data/servers/voices-v1.0.bin",
+        "TTS_OUTPUT_DIR": "/home/mtuckerb/Documents/",
+        "TTS_DEFAULT_VOICE": "af_bella",
+        "TTS_ENABLE_STREAMING": "false"
+      },
+      "enabled": false
+    },
+    "flux1": {
+      "command": "node",
+      "args": ["/data/mcp-proxy/servers/flux-image-generator-mcp/dist/index.js"],
+      "env": { "BFL_API_KEY": "YOUR_BFL_API_KEY" },
+      "enabled": false
+    },
+    "nano-banana": {
+      "command": "npx",
+      "args": ["nano-banana-mcp"],
+      "env": {
+        "GEMINI_API_KEY": "YOUR_GEMINI_API_KEY"
+      },
+      "enabled": false
+    },
+    "gemini": {
+      "command": "/data/mcp-proxy/servers/gemini-mcp-v1.0.1-linux-amd64",
+      "env": {
+        "GOOGLE_API_KEY": "YOUR_GOOGLE_API_KEY"
+      },
+      "enabled": false
+    },
+    "speach": {
+      "command": "npx",
+      "args": ["-y", "speech-mcp-server"],
+      "env": {
+        "MCP_DEFAULT_SPEECH_SPEED":  "1.3",
+        "MCP_DEFAULT_VOICE": "af_bella"
+      },
+      "enabled": false
+    },
+    "curl": {
+      "command": "npx",
+      "args": ["-y", "@mcp-get-community/server-curl"],
+      "enabled": false
+    },
+    "Ref": {
+      "command": "npx",
+      "args": ["ref-tools-mcp@latest"],
+      "env": { "REF_API_KEY": "YOUR_REF_API_KEY" },
+      "enabled": false
+    },
+    "current-time": {
+      "command": "npx",
+      "args": ["@mcpcentral/mcp-time"],
+      "enabled": false
+    },
+    "github-official": {
+      "command": "/run/current-system/sw/bin/podman",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN"
+      },
+      "enabled": false
+    },
+    "package_manager": {
+      "command": "python3",
+      "args": ["/opt/mcp-custom/package_manager.py"],
+      "env": {
+        "PATH": "/root/.cargo/bin:/root/.bun/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "cwd": "/app",
+      "enabled": false
+    },
+    "development-tools": {
+      "command": "python3",
+      "args": ["/app/mcp_custom_dev_tools.py"],
+      "env": {
+        "PATH": "/root/.cargo/bin:/root/.bun/bin:/usr/local/bin:/usr/bin:/bin"
+      },
+      "cwd": "/app",
+      "enabled": true
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/app"],
+      "env": {},
+      "enabled": false
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/app"],
+      "env": {},
+      "enabled": false
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite"],
+      "env": {},
+      "enabled": false
+    }
+  }
+}

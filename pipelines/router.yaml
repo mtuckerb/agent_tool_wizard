@@ -1,0 +1,34 @@
+version: 1.13
+
+name: router
+type: pipeline
+description: Simple router pipeline for AI Tools Hub
+
+metadata:
+  type: FunctionPipeline
+  icon: "router"
+  tags: ["chat", "router"]
+
+# Define the pipeline as a simple function
+components:
+  - name: router_response
+    type: function
+    config:
+      function_code: |
+        def process_request(data):
+          user_message = "hello"
+          if isinstance(data, dict):
+              messages = data.get('messages', [])
+              if messages:
+                  msg = messages[-1]
+                  if isinstance(msg, dict):
+                      user_message = msg.get('content', 'hello')
+                  else:
+                      user_message = str(msg)
+          
+          return {
+              "replies": [{
+                  "content": f"Router received: {user_message}",
+                  "meta": {"source": "yaml_function"}
+              }]
+          }

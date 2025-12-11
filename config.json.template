@@ -1,0 +1,36 @@
+# Agent Configuration Template
+
+This is a template for the `config.json` file. Replace `YOUR_*_API_KEY` values with your actual API keys and tokens.
+
+# Setting Up API Keys
+
+1. Copy this template to `config.json`:
+   ```bash
+   cp config.json.template config.json
+   ```
+
+2. Replace placeholder values with your actual keys:
+   - `YOUR_OBSIDIAN_API_KEY`: Your Obsidian API key
+   - `YOUR_GEMINI_API_KEY`: Your Google AI API key
+   - `YOUR_HF_TOKEN`: Your Hugging Face token
+   - `YOUR_BFL_API_KEY`: Your Black Forest Labs API key
+   - `YOUR_GITHUB_TOKEN`: Your GitHub personal access token
+   - `YOUR_REF_API_KEY`: Your Ref API key
+   - `YOUR_NYT_API_KEY`: Your New York Times API key
+   - `YOUR_CRAWL4AI_BASE_URL`: Your Crawl4AI base URL
+
+# Server Configuration
+
+All servers are disabled by default (`"enabled": false`). To enable a server:
+
+1. Set `"enabled": true` for the desired server
+2. Ensure you have provided the required API keys
+3. Make sure the command is accessible in the container
+4. Restart the agent_multitool container
+
+# Security Notes
+
+- Never commit actual API keys to version control
+- Use environment variables for production deployments
+- Keep your `.env` file in `.gitignore`
+- Rotate keys regularly for security

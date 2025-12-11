@@ -1,0 +1,11 @@
+# Example Configuration with Development Tools Only
+
+This minimal config.json shows the development-tools server enabled, which provides:
+
+- create_python_project: Create Python projects with uv/pip
+- create_nodejs_project: Create Node.js projects with npm/bun  
+- install_packages: Cross-ecosystem package management
+- run_command: Execute commands using appropriate package managers
+- list_dependencies: Show project dependencies
+
+To add more servers, follow the template and add entries to the mcpServers object.

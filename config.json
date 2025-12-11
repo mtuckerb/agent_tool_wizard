@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "development-tools": {
+      "command": "python3",
+      "args": ["/app/mcp_custom_dev_tools.py"],
+      "env": {},
+      "cwd": "/app",
+      "enabled": true
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/app"],
+      "env": {},
+      "enabled": false
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/app"],
+      "env": {},
+      "enabled": false
+    },
+    "current-time": {
+      "command": "npx",
+      "args": ["@mcpcentral/mcp-time"],
+      "env": {},
+      "enabled": false
+    }
+  }
+}

@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  agent-multitool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-multitool-dev
+    ports:
+      - "1417:1417"
+      - "1418:1418"
+    environment:
+      # Core configuration
+      - AGENT_NAME=agent_multitool
+      - AGENT_VERSION=1.0.0
+      - AGENT_PORT=1417
+      - MCP_PORT=1418
+      
+      # LLM configuration (set your own API key)
+      - LLM_PROVIDER=openai
+      - LLM_MODEL=gpt-3.5-turbo
+      - LLM_API_KEY=${OPENAI_API_KEY:-your-api-key-here}
+      
+      # Alternative LLM configuration
+      # - LLM_PROVIDER=ollama
+      # - LLM_MODEL=llama2
+      # - LLM_BASE_URL=http://host.docker.internal:11434/v1
+      
+      # Debug and development
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=debug
+      
+    volumes:
+      # Mount config for editing
+      - ./config.json:/app/config.json:ro
+      
+      # Mount source code for development
+      - ./pipelines:/app/pipelines:ro
+      
+      # Mount logs
+      - ./logs:/app/logs
+      
+    networks:
+      - agent-network
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1417/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development helper API client
+  api-tester:
+    image: curlimages/curl:latest
+    container_name: agent-multitool-tester
+    depends_on:
+      - agent-multitool
+    command: >
+      sh -c "
+      echo 'Waiting for agent-multitool to be healthy...'
+      while ! curl -f http://agent-multitool:1417/api/health > /dev/null 2>&1; do
+        echo 'Waiting...'
+        sleep 2
+      done
+      echo '✅ agent-multitool is healthy!'
+      echo ''
+      echo 'Testing endpoints:'
+      echo '1. Root endpoint:'
+      curl -s http://agent-multitool:1417/ | jq .
+      echo ''
+      echo '2. Health check:'
+      curl -s http://agent-multitool:1417/api/health | jq .
+      echo ''
+      echo '3. Available tools:'
+      curl -s http://agent-multitool:1417/api/tools | jq .total_tools
+      echo ''
+      echo '🚨 Keep this container running to test from another terminal:'
+      echo 'docker exec -it agent-multitool-tester curl http://agent-multitool:1417/api/'
+      "
+    networks:
+      - agent-network
+    
+networks:
+  agent-network:
+    driver: bridge
+
+volumes:
+  logs:
