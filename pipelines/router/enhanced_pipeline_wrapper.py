@@ -1070,9 +1070,14 @@ For "generate a picture of a house": {{"selected_tool": "nano-banana.generate_im
         return None
 
     async def _select_tool_for_query(self, user_input: str, tools: Dict[str, List[dict]]) -> Optional[tuple]:
-        """Intelligent tool selection - Image keywords first, then LLM, then general keywords fallback"""
+        """Intelligent tool selection - Explicit tool names first, Image keywords second, then LLM, then general keywords fallback"""
         
-        # Try image generation keywords first (highest priority)
+        # Try explicit tool name matching first (highest priority)
+        explicit_result = await self._select_tool_for_query_explicit_name(user_input, tools)
+        if explicit_result:
+            return explicit_result
+        
+        # Try image generation keywords second
         image_result = await self._select_tool_for_query_image_keywords(user_input, tools)
         if image_result:
             return image_result
@@ -1087,6 +1092,80 @@ For "generate a picture of a house": {{"selected_tool": "nano-banana.generate_im
         
         # Fallback to general keyword-based selection
         return await self._select_tool_for_query_keywords(user_input, tools)
+    
+    async def _select_tool_for_query_explicit_name(self, user_input: str, tools: Dict[str, List[dict]]) -> Optional[tuple]:
+        """Highest priority: Detect explicit tool name mentions in user query"""
+        user_input_lower = user_input.lower()
+        
+        # Common patterns for tool name mentions
+        tool_patterns = [
+            r'use\s+(\w+)\s+tool',
+            r'use\s+(\w+)\s+to',
+            r'(\w+)\s+tool',
+            r'call\s+(\w+)',
+            r'run\s+(\w+)',
+            r'execute\s+(\w+)',
+            r'tool\s+(\w+)',
+            r'(\w+)\s+function',
+            r'(\w+)\s+method',
+            r'with\s+(\w+)',
+            r'using\s+(\w+)',
+            r'(\w+)\s+to\s+\w+',  # "toolname to get something"
+            r'(\w+)\s+for\s+\w+',  # "toolname for something"
+            r'(\w+)(?=\s+url)',   # "toolname url"
+            r'(\w+)(?=\s+http)',  # "toolname http://..."
+        ]
+        
+        # Also look for exact tool name matches without patterns
+        words = user_input_lower.split()
+        for word in words:
+            # Skip common words that aren't tool names
+            if word in ['the', 'and', 'to', 'for', 'with', 'get', 'fetch', 'use', 'call', 'run', 'execute', 'tool', 'please']:
+                continue
+            
+            # Check if this word is exactly a tool name
+            for server_name, server_tools in tools.items():
+                for tool in server_tools:
+                    if tool['name'].lower() == word:
+                        logger.info(f"Direct tool name match detected: '{word}'")
+                        # Check if URL needed for this tool
+                        if 'url' in tool.get('inputSchema', {}).get('properties', {}):
+                            # Extract URL for tools that need it
+                            url_patterns = [r'https?://[^\s\)]+', r'https?://[^\s\(]+', r'https?://[^\s,\.]+']
+                            for url_pattern in url_patterns:
+                                url_match = re.search(url_pattern, user_input)
+                                if url_match:
+                                    return server_name, tool['name'], {"url": url_match.group(0)}
+                            return server_name, tool['name'], {}
+                        else:
+                            return server_name, tool['name'], {}
+        
+        import re
+        
+        # Check for explicit tool name patterns
+        for pattern in tool_patterns:
+            match = re.search(pattern, user_input_lower)
+            if match:
+                mentioned_tool = match.group(1)
+                logger.info(f"Explicit tool name detected: '{mentioned_tool}'")
+                
+                # Search for exact tool name match across all servers
+                for server_name, server_tools in tools.items():
+                    for tool in server_tools:
+                        if tool['name'].lower() == mentioned_tool.lower():
+                            # Check if URL needed for this tool
+                            if 'url' in tool.get('inputSchema', {}).get('properties', {}):
+                                # Extract URL for tools that need it
+                                url_patterns = [r'https?://[^\s\)]+', r'https?://[^\s\(]+', r'https?://[^\s,\.]+']
+                                for url_pattern in url_patterns:
+                                    url_match = re.search(url_pattern, user_input)
+                                    if url_match:
+                                        return server_name, tool['name'], {"url": url_match.group(0)}
+                                return server_name, tool['name'], {}
+                            else:
+                                return server_name, tool['name'], {}
+        
+        return None
     
     async def _select_tool_for_query_image_keywords(self, user_input: str, tools: Dict[str, List[dict]]) -> Optional[tuple]:
         """High-priority image generation detection"""
