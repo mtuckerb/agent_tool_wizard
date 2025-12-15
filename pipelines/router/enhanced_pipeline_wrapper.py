@@ -870,35 +870,31 @@ Available tools:
 {json.dumps([{"name": t["name"], "description": t["context"], "keywords": t["keywords"], "inputSchema": t["inputSchema"]} for t in tools_description], indent=2)}
 
 Instructions:
-1. Analyze the user's intent and match it with the most relevant tool
-2. Consider when the user mentions keywords like "obsidian", "note", "vault", "notes", "list my obsidian vault" - select obsidian tools
-3. Consider when the user mentions "time", "current time", "what time" - select time tools  
-4. Consider when the user mentions "fetch", "curl", "web", "url" - select web tools
-5. **IMAGE GENERATION: When user mentions "create", "generate", "image", "picture", "draw", "make", "art", "visual" - ALWAYS select nano-banana.generate_image, NOT configuration tools**
-6. **CRITICAL: nano-banana.generate_image is for CREATING images, nano-banana.configure_gemini_token is ONLY for API setup**
-7. Each tool has associated keywords that indicate what it's good for
+1. Analyze the user's intent and match it with the most relevant tool based on descriptions and keywords
+2. Look for keywords in the user query that match tool names, descriptions, or server-level keywords
+3. Consider the user's primary intent and what they want to accomplish
+4. **CRITICAL: For tools that take URLs or web addresses - ALWAYS extract the complete URL from the user query**
+5. URLs will be in format like "https://example.com" or "http://example.com" - extract them exactly as provided
+6. **For image/visual generation tools: json_body MUST include the "prompt" field with the image description**
+7. Each tool has an inputSchema that defines what parameters it needs
 8. Construct the JSON request body based on the tool's inputSchema and the user's intent
-9. **CRITICAL: For web/fetch/curl tools - ALWAYS extract URLs from the user query**
-10. URLs will be in format like "https://example.com" or "http://example.com" - extract them exactly as provided
-11. **For nano-banana.generate_image: json_body MUST include the "prompt" field with the image description**
-12. Respond with EXACTLY one of these formats:
+9. Respond with EXACTLY one of these formats:
    - If you found a tool: {{"selected_tool": "server.tool_name", "json_body": {{construct appropriate JSON}}, "reason": "brief reason"}}
    - If no tool matches: {{"selected_tool": null, "json_body": {{}}, "reason": "no matching tool found"}}
 
 For the json_body:
 - Use the tool's inputSchema as a guide
-- **For curl/fetch tools: json_body MUST include the extracted URL in the "url" field**
-- **For nano-banana.generate_image: json_body MUST include the "prompt" field with the image description**
+- **For web fetching tools: json_body MUST include the extracted URL in the appropriate parameter**
+- **For image generation tools: json_body MUST include the description/prompt field**
 - Fill in parameters that can be inferred from the user query
 - For empty parameters, use sensible defaults or empty strings
 - For boolean parameters, use true/false
 - For array parameters, use [] or appropriate values
 
 Examples of expected outputs:
-For "fetch https://tuckerbradford.com": {{"selected_tool": "curl.fetch", "json_body": {{"url": "https://tuckerbradford.com"}}, "reason": "User wants to fetch a webpage"}}
-For "what time is it": {{"selected_tool": "current-time.current_time", "json_body": {{}}, "reason": "User wants current time"}}
-For "create an image of a cat": {{"selected_tool": "nano-banana.generate_image", "json_body": {{"prompt": "a cat"}}, "reason": "User wants to generate an image"}}
-For "generate a picture of a house": {{"selected_tool": "nano-banana.generate_image", "json_body": {{"prompt": "a house"}}, "reason": "User wants to create an image"}}"""
+- For fetching a webpage: {{"selected_tool": "web.fetch", "json_body": {{"url": "https://example.com"}}, "reason": "User wants to fetch a webpage"}}
+- For getting current time: {{"selected_tool": "time.current_time", "json_body": {{}}, "reason": "User wants current time"}}
+- For generating an image: {{"selected_tool": "image.generate", "json_body": {{"prompt": "a cat"}}, "reason": "User wants to generate an image"}}"""
         
         messages = [
             {"role": "system", "content": system_prompt},
@@ -1168,20 +1164,25 @@ For "generate a picture of a house": {{"selected_tool": "nano-banana.generate_im
         return None
     
     async def _select_tool_for_query_image_keywords(self, user_input: str, tools: Dict[str, List[dict]]) -> Optional[tuple]:
-        """High-priority image generation detection"""
+        """High-priority image generation detection - generic approach"""
         user_input_lower = user_input.lower()
         
         # Image generation queries - HIGHEST PRIORITY
         image_keywords = ['create', 'generate', 'image', 'picture', 'draw', 'make', 'art', 'visual', 'photo', 'painting']
         if any(keyword in user_input_lower for keyword in image_keywords):
+            # Look for tools that might be image/visual generation based on names and descriptions
             for server_name, server_tools in tools.items():
-                if 'nano-banana' in server_name.lower():
-                    for tool in server_tools:
-                        if tool['name'] == 'generate_image':
-                            # Extract the prompt from the user query
-                            prompt = user_input  # Use full query as prompt
-                            logger.info(f"🎨 Image keyword detection: selected nano-banana.generate_image with prompt: '{prompt}'")
-                            return server_name, tool['name'], {"prompt": prompt}
+                for tool in server_tools:
+                    tool_name_lower = tool['name'].lower()
+                    description_lower = tool.get('description', '').lower()
+                    
+                    # Check if tool appears to be for image/visual generation
+                    if any(keyword in tool_name_lower for keyword in ['image', 'picture', 'generate', 'create', 'visual', 'art', 'draw']) or \
+                       any(keyword in description_lower for keyword in ['image', 'picture', 'generate', 'create', 'visual', 'art', 'draw']):
+                        # Extract the prompt from the user query
+                        prompt = user_input  # Use full query as prompt
+                        logger.info(f"🎨 Image keyword detection: selected {server_name}.{tool['name']} with prompt: '{prompt}'")
+                        return server_name, tool['name'], {"prompt": prompt}
         
         return None
 
